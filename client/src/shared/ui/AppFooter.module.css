@@ -1,0 +1,19 @@
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 16, 32, 0.6);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.muted {
+  color: rgba(231, 236, 255, 0.62);
+}
+

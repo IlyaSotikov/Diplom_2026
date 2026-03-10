@@ -1,0 +1,43 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(80% 120% at 10% 0%, rgba(64, 123, 255, 0.18), transparent 55%),
+    radial-gradient(80% 120% at 90% 10%, rgba(33, 214, 166, 0.12), transparent 60%),
+    #0b1020;
+  color: #e7ecff;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.link {
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #cbd6ff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.link:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.linkActive {
+  color: #0b1020;
+  background: linear-gradient(135deg, #65a8ff, #2af0c3);
+  border-color: transparent;
+}
+
+.main {
+  flex: 1;
+  padding: 18px 0 30px;
+}
+

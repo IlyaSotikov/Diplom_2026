@@ -1,0 +1,16 @@
+.wrap {
+  margin: 10px 0 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.2px;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: rgba(231, 236, 255, 0.72);
+  max-width: 70ch;
+}
+
