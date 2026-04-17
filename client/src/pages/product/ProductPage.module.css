@@ -85,6 +85,29 @@
   max-width: 70ch;
 }
 
+.notice {
+  border-radius: 10px;
+  border: 1px solid rgba(42, 240, 195, 0.44);
+  background: rgba(42, 240, 195, 0.12);
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.errorCard {
+  border: 1px solid rgba(255, 98, 98, 0.42);
+  background: rgba(255, 98, 98, 0.08);
+}
+
+.errorTitle {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.errorText {
+  margin-bottom: 10px;
+  color: rgba(231, 236, 255, 0.82);
+}
+
 .empty {
   color: rgba(231, 236, 255, 0.8);
 }

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { productsApi } from '../../entities/product/api/productsApi'
-import type { Product, ProductCategory } from '../../entities/product/model/types'
+import { useCatalogProducts } from '../../app/hooks/useCatalogProducts'
+import type { ProductCategory } from '../../entities/product/model/types'
 import { Card } from '../../shared/ui/Card'
 import { PageTitle } from '../../shared/ui/PageTitle'
 import styles from './CatalogPage.module.css'
@@ -15,24 +15,7 @@ const categories: Array<{ key: ProductCategory | 'all'; label: string }> = [
 
 export function CatalogPage() {
   const [category, setCategory] = useState<ProductCategory | 'all'>('all')
-  const [items, setItems] = useState<Product[] | null>(null)
-
-  const apiParams = useMemo(
-    () => (category === 'all' ? undefined : { category }),
-    [category],
-  )
-
-  useEffect(() => {
-    let cancelled = false
-    setItems(null)
-    productsApi.list(apiParams).then((data) => {
-      if (cancelled) return
-      setItems(data)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [apiParams])
+  const { status, items, message } = useCatalogProducts(category)
 
   return (
     <div className={styles.page}>
@@ -61,8 +44,15 @@ export function CatalogPage() {
         </div>
       </Card>
 
+      {status === 'error' ? (
+        <Card className={styles.errorCard}>
+          <div className={styles.errorTitle}>Не удалось загрузить каталог</div>
+          <div className={styles.errorText}>{message}</div>
+        </Card>
+      ) : null}
+
       <div className={styles.grid}>
-        {items === null
+        {status === 'loading'
           ? Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className={styles.skeleton} aria-hidden="true" />
             ))

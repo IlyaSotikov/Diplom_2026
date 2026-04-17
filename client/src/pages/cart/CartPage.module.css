@@ -26,9 +26,86 @@
   margin-bottom: 12px;
 }
 
+.errorBox {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 98, 98, 0.42);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255, 98, 98, 0.08);
+}
+
+.retry {
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .link {
   color: #cbd6ff;
   text-decoration: none;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.itemTitle {
+  font-weight: 700;
+}
+
+.itemPrice {
+  margin-top: 5px;
+  color: rgba(231, 236, 255, 0.8);
+  font-size: 13px;
+}
+
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qtyBtn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e7ecff;
+  cursor: pointer;
+}
+
+.qtyValue {
+  min-width: 18px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.remove {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: transparent;
+  color: #e7ecff;
+  padding: 6px 9px;
+  cursor: pointer;
 }
 
 .row {
@@ -49,6 +126,18 @@
   background: linear-gradient(135deg, #65a8ff, #2af0c3);
   color: #0b1020;
   opacity: 0.6;
+}
+
+.clear {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: #e7ecff;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .hint {

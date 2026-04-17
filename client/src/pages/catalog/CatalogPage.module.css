@@ -49,6 +49,21 @@
   gap: 12px;
 }
 
+.errorCard {
+  border: 1px solid rgba(255, 98, 98, 0.42);
+  background: rgba(255, 98, 98, 0.08);
+}
+
+.errorTitle {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.errorText {
+  color: rgba(231, 236, 255, 0.82);
+  font-size: 14px;
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

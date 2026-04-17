@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { productsApi } from '../../entities/product/api/productsApi'
-import type { Product } from '../../entities/product/model/types'
+import { useCart } from '../../app/hooks/useCart'
+import { useProductDetails } from '../../app/hooks/useProductDetails'
 import { Button } from '../../shared/ui/Button'
 import { Card } from '../../shared/ui/Card'
 import { PageTitle } from '../../shared/ui/PageTitle'
@@ -9,30 +9,19 @@ import styles from './ProductPage.module.css'
 
 export function ProductPage() {
   const { productId } = useParams<{ productId: string }>()
-  const [product, setProduct] = useState<Product | null | 'loading'>('loading')
+  const [isAddedNoticeVisible, setIsAddedNoticeVisible] = useState(false)
+  const { status, product, message } = useProductDetails(productId)
+  const { addItem, isMutating } = useCart()
 
-  useEffect(() => {
-    if (!productId) return
-    let cancelled = false
-    setProduct('loading')
-    productsApi.getById(productId).then((p) => {
-      if (cancelled) return
-      setProduct(p)
+  async function handleAddToCart() {
+    if (!product || !product.inStock) return
+    await addItem({
+      productId: product.id,
+      title: product.title,
+      priceRub: product.priceRub,
     })
-    return () => {
-      cancelled = true
-    }
-  }, [productId])
-
-  if (!productId) {
-    return (
-      <div className={styles.page}>
-        <PageTitle title="Товар" subtitle="Некорректный идентификатор товара." />
-        <Link className={styles.back} to="/">
-          ← В каталог
-        </Link>
-      </div>
-    )
+    setIsAddedNoticeVisible(true)
+    window.setTimeout(() => setIsAddedNoticeVisible(false), 1800)
   }
 
   return (
@@ -42,7 +31,17 @@ export function ProductPage() {
         subtitle="Каркас сценария: просмотр товара → добавление в корзину → переход в корзину."
       />
 
-      {product === 'loading' ? (
+      {status === 'error' ? (
+        <Card className={styles.errorCard}>
+          <div className={styles.errorTitle}>Ошибка загрузки товара</div>
+          <div className={styles.errorText}>{message}</div>
+          <Link className={styles.back} to="/">
+            ← В каталог
+          </Link>
+        </Card>
+      ) : null}
+
+      {status === 'loading' ? (
         <Card>
           <div className={styles.loading}>
             <div className={styles.loadingBar} />
@@ -50,7 +49,7 @@ export function ProductPage() {
             <div className={styles.loadingBar} />
           </div>
         </Card>
-      ) : product === null ? (
+      ) : status === 'error' ? null : product === null ? (
         <Card>
           <div className={styles.empty}>Товар не найден.</div>
         </Card>
@@ -69,8 +68,8 @@ export function ProductPage() {
               </div>
               <div className={styles.price}>{product.priceRub.toLocaleString('ru-RU')} ₽</div>
               <div className={styles.actions}>
-                <Button disabled={!product.inStock} onClick={() => undefined}>
-                  Добавить в корзину
+                <Button disabled={!product.inStock || isMutating} onClick={handleAddToCart}>
+                  {isMutating ? 'Добавление...' : 'Добавить в корзину'}
                 </Button>
                 <Link className={styles.linkGhost} to="/cart">
                   Перейти в корзину
@@ -80,6 +79,7 @@ export function ProductPage() {
                 </Link>
               </div>
               <div className={styles.desc}>{product.shortDescription}</div>
+              {isAddedNoticeVisible ? <div className={styles.notice}>Товар добавлен в корзину.</div> : null}
             </div>
           </div>
         </Card>
