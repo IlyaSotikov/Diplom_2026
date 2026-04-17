@@ -20,7 +20,7 @@
 
 ### Ссылка на макет (обязательно)
 
-Макет опубликован в Figma: **`PASTE_FIGMA_LINK_HERE`**
+Макет опубликован в Figma: [https://www.figma.com/design/xU42c48LUWIoxAZZJTdhMt/Untitled?node-id=0-1&p=f&t=j52ZqXKJB0WnSTl7-0](https://www.figma.com/design/xU42c48LUWIoxAZZJTdhMt/Untitled?node-id=0-1&p=f&t=j52ZqXKJB0WnSTl7-0)
 
 > Замените `PASTE_FIGMA_LINK_HERE` на вашу публичную ссылку из Figma (Share → Copy link).
 
