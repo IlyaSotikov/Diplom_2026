@@ -12,17 +12,16 @@
 
 Выбран подход **многоуровневой архитектуры (Layered Architecture)**:
 
-- **Presentation layer**: `client/src` (UI, страницы, навигация)
-- **Application/Business layer**: `server` (будет развиваться далее)
-- **Data access layer / Database layer**: будут добавлены на следующих этапах
+- **Presentation layer**: `client/src/pages`, `client/src/shared/ui` (UI, страницы, навигация)
+- **Application/Business layer**: `client/src/app/hooks` (сценарии и бизнес-операции)
+- **Data access layer**: `client/src/entities/*/api` (доступ к данным: mock API + localStorage)
+- **Backend layer (этап заготовки)**: `server`
 
 ## ЛР‑3: UI‑макет и начальная реализация
 
 ### Ссылка на макет (обязательно)
 
 Макет опубликован в Figma: [https://www.figma.com/design/xU42c48LUWIoxAZZJTdhMt/Untitled?node-id=0-1&p=f&t=j52ZqXKJB0WnSTl7-0](https://www.figma.com/design/xU42c48LUWIoxAZZJTdhMt/Untitled?node-id=0-1&p=f&t=j52ZqXKJB0WnSTl7-0)
-
-> Замените `PASTE_FIGMA_LINK_HERE` на вашу публичную ссылку из Figma (Share → Copy link).
 
 ### Назначение макета
 
@@ -43,6 +42,30 @@
 - Просмотр корзины → переход к оформлению заказа (пока заглушка)
 - Просмотр личного кабинета (профиль/история/адреса — заглушки)
 - Просмотр административной панели (разделы управления — заглушки)
+
+## ЛР-4: Реализация основной функциональности (этап 2 из 3)
+
+### Что реализовано
+
+- Вынесена логика доступа к данным в отдельный слой:
+  - `client/src/entities/product/api/productsApi.ts` (mock-данные каталога/карточки)
+  - `client/src/entities/cart/api/cartApi.ts` (корзина в `localStorage`)
+- Добавлен слой бизнес-логики:
+  - `client/src/app/hooks/useCatalogProducts.ts`
+  - `client/src/app/hooks/useProductDetails.ts`
+  - `client/src/app/hooks/useCart.ts`
+- Связаны UI-экраны и бизнес-логика:
+  - каталог: фильтрация + загрузка + обработка ошибок
+  - карточка товара: загрузка, ошибка, добавление в корзину
+  - корзина: загрузка, изменение количества, удаление, очистка, подсчёт итога
+
+### Состояния данных
+
+Для ключевых сценариев реализована обработка состояний:
+
+- `loading` — отображается скелетон/индикатор загрузки;
+- `success` — отображаются данные;
+- `error` — отображается сообщение об ошибке и возможность повторить операцию.
 
 ## Структура проекта
 
