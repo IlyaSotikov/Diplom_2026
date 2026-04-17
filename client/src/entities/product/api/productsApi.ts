@@ -34,14 +34,22 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+function assertOnline() {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    throw new Error('Нет подключения к сети. Проверьте интернет и попробуйте снова.')
+  }
+}
+
 export const productsApi = {
   async list(params?: { category?: ProductCategory }) {
     await delay(250)
+    assertOnline()
     if (!params?.category) return mockProducts
     return mockProducts.filter((p) => p.category === params.category)
   },
   async getById(productId: ProductId) {
     await delay(200)
+    assertOnline()
     return mockProducts.find((p) => p.id === productId) ?? null
   },
 }
