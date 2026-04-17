@@ -116,16 +116,63 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.checkout {
-  width: 100%;
+.checkoutForm {
   margin-top: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formTitle {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e7ecff;
+  padding: 9px 10px;
+  font: inherit;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.checkoutPrimary {
+  width: 100%;
   border: 0;
+  margin-top: 2px;
+  padding: 11px 12px;
+  border-radius: 12px;
   font-weight: 800;
   background: linear-gradient(135deg, #65a8ff, #2af0c3);
   color: #0b1020;
-  opacity: 0.6;
+  cursor: pointer;
+}
+
+.checkoutPrimary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.errorInline {
+  color: #ffb1b1;
+  font-size: 13px;
+}
+
+.successInline {
+  color: #9ef7df;
+  font-size: 13px;
+}
+
+.successInline a {
+  color: #d8fff4;
 }
 
 .clear {

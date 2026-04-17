@@ -1,11 +1,59 @@
 import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { useCart } from '../../app/hooks/useCart'
+import { ordersApi } from '../../entities/order/api/ordersApi'
 import { Card } from '../../shared/ui/Card'
 import { PageTitle } from '../../shared/ui/PageTitle'
 import styles from './CartPage.module.css'
 
 export function CartPage() {
   const { status, items, totalRub, isMutating, setQuantity, removeItem, clear, message, reload } = useCart()
+  const [form, setForm] = useState({
+    fullName: '',
+    phone: '',
+    address: '',
+  })
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [checkoutSuccess, setCheckoutSuccess] = useState<string | null>(null)
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false)
+
+  const canCheckout = useMemo(() => {
+    return (
+      items.length > 0 &&
+      form.fullName.trim().length >= 2 &&
+      form.phone.trim().length >= 6 &&
+      form.address.trim().length >= 6
+    )
+  }, [form.address, form.fullName, form.phone, items.length])
+
+  async function handleCheckout() {
+    setCheckoutError(null)
+    setCheckoutSuccess(null)
+
+    if (!canCheckout) {
+      setCheckoutError('Проверьте данные получателя: имя, телефон и адрес обязательны.')
+      return
+    }
+
+    setIsCheckoutLoading(true)
+    try {
+      const order = await ordersApi.create({
+        items,
+        contact: {
+          fullName: form.fullName.trim(),
+          phone: form.phone.trim(),
+          address: form.address.trim(),
+        },
+      })
+      await clear()
+      setCheckoutSuccess(`Заказ ${order.id} успешно оформлен.`)
+      setForm({ fullName: '', phone: '', address: '' })
+    } catch (error: unknown) {
+      setCheckoutError(error instanceof Error ? error.message : 'Ошибка оформления заказа.')
+    } finally {
+      setIsCheckoutLoading(false)
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -88,9 +136,41 @@ export function CartPage() {
             <span>Доставка</span>
             <span>{items.length > 0 ? 'Бесплатно' : '—'}</span>
           </div>
-          <button type="button" className={styles.checkout} disabled={items.length === 0 || isMutating}>
-            Оформить заказ
-          </button>
+          <div className={styles.checkoutForm}>
+            <div className={styles.formTitle}>Данные получателя</div>
+            <input
+              className={styles.input}
+              placeholder="ФИО"
+              value={form.fullName}
+              onChange={(event) => setForm((prev) => ({ ...prev, fullName: event.target.value }))}
+            />
+            <input
+              className={styles.input}
+              placeholder="Телефон"
+              value={form.phone}
+              onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+            />
+            <textarea
+              className={styles.textarea}
+              placeholder="Адрес доставки"
+              value={form.address}
+              onChange={(event) => setForm((prev) => ({ ...prev, address: event.target.value }))}
+            />
+            <button
+              type="button"
+              className={styles.checkoutPrimary}
+              onClick={handleCheckout}
+              disabled={!canCheckout || isCheckoutLoading || isMutating}
+            >
+              {isCheckoutLoading ? 'Оформляем...' : 'Подтвердить заказ'}
+            </button>
+            {checkoutError ? <div className={styles.errorInline}>{checkoutError}</div> : null}
+            {checkoutSuccess ? (
+              <div className={styles.successInline}>
+                {checkoutSuccess} <Link to="/profile">Перейти в кабинет</Link>
+              </div>
+            ) : null}
+          </div>
           <button
             type="button"
             className={styles.clear}
@@ -99,7 +179,7 @@ export function CartPage() {
           >
             Очистить корзину
           </button>
-          <div className={styles.hint}>Оформление заказа будет реализовано на следующем этапе.</div>
+          <div className={styles.hint}>После оформления заказ появится в личном кабинете и админ-панели.</div>
         </Card>
       </div>
     </div>

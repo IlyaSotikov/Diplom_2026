@@ -26,3 +26,94 @@
   line-height: 1.5;
 }
 
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e7ecff;
+  padding: 9px 10px;
+  font: inherit;
+}
+
+.textarea {
+  margin-top: 10px;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.primaryButton {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #65a8ff, #2af0c3);
+  color: #0b1020;
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success {
+  color: #9ef7df;
+  font-size: 13px;
+}
+
+.orders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.orderItem {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+
+.orderTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-weight: 700;
+  flex-wrap: wrap;
+}
+
+.addressBlock {
+  padding: 8px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: rgba(231, 236, 255, 0.85);
+}
+
+.errorBox {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 98, 98, 0.42);
+  background: rgba(255, 98, 98, 0.08);
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.retry {
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+

@@ -6,7 +6,7 @@ import styles from './NotFoundPage.module.css'
 export function NotFoundPage() {
   return (
     <div className={styles.page}>
-      <PageTitle title="Страница не найдена" subtitle="Ошибка 404 (заглушка)." />
+      <PageTitle title="Страница не найдена" subtitle="Ошибка 404. Проверьте адрес или вернитесь в каталог." />
       <Card>
         <Link className={styles.link} to="/">
           ← В каталог
