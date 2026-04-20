@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Container } from './Container'
 import styles from './AppHeader.module.css'
+import logoImage from '../../assets/sshop-logo.png'
 
 export function AppHeader({ children }: { children?: ReactNode }) {
   return (
@@ -8,9 +9,9 @@ export function AppHeader({ children }: { children?: ReactNode }) {
       <Container>
         <div className={styles.row}>
           <div className={styles.brand}>
-            <div className={styles.logo} aria-hidden="true" />
+            <img className={styles.logo} src={logoImage} alt="Логотип SShop" />
             <div>
-              <div className={styles.title}>SportShop</div>
+              <div className={styles.title}>SShop</div>
               <div className={styles.subtitle}>Интернет‑магазин спортивных товаров</div>
             </div>
           </div>

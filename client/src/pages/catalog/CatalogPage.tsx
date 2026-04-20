@@ -8,9 +8,10 @@ import styles from './CatalogPage.module.css'
 
 const categories: Array<{ key: ProductCategory | 'all'; label: string }> = [
   { key: 'all', label: 'Все' },
-  { key: 'football', label: 'Футбол' },
-  { key: 'running', label: 'Бег' },
-  { key: 'fitness', label: 'Фитнес' },
+  { key: 'protein', label: 'Протеин' },
+  { key: 'gainer', label: 'Гейнер' },
+  { key: 'bcaa', label: 'BCAA' },
+  { key: 'vitamins', label: 'Витамины' },
 ]
 
 export function CatalogPage() {
@@ -21,12 +22,12 @@ export function CatalogPage() {
     <div className={styles.page}>
       <PageTitle
         title="Каталог"
-        subtitle="Каркас интерфейса для сценария: просмотр категорий → выбор товара → переход в карточку."
+        subtitle="Спортивное питание: подбор категории, просмотр состава и переход в карточку товара."
       />
 
       <Card className={styles.filters}>
         <div className={styles.filterRow}>
-          <span className={styles.label}>Категория</span>
+          <span className={styles.label}>Раздел</span>
           <div className={styles.pills}>
             {categories.map((c) => (
               <button
@@ -58,6 +59,9 @@ export function CatalogPage() {
             ))
           : items.map((p) => (
               <Card key={p.id} className={styles.productCard}>
+                <div className={styles.thumbWrap}>
+                  <img className={styles.thumb} src={p.imageUrl} alt={p.title} loading="lazy" />
+                </div>
                 <div className={styles.productTop}>
                   <div className={styles.productTitle}>{p.title}</div>
                   <div className={styles.productMeta}>

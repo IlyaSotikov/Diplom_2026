@@ -17,3 +17,12 @@
   color: rgba(231, 236, 255, 0.62);
 }
 
+.contacts {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 0 14px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+

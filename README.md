@@ -111,6 +111,28 @@ npm install
 npm start
 ```
 
+### Клиент через Apache (без :5173)
+
+Соберите фронтенд в папку Apache:
+
+```bash
+cd client
+npm install
+npm run build:apache
+```
+
+После сборки откройте:
+
+- `http://localhost/Diplom_2026/server/public/app/`
+
+API будет доступно по:
+
+- `http://localhost/Diplom_2026/server/public/index.php/api/health`
+
+В MySQL: таблица **`users`** (аккаунты) и **`product_reviews`** (отзывы, связь по `user_id`) — см. `server/database/schema.sql` и `server/README.md`.
+
+**Про кнопку Admin в XAMPP:** она не запускает магазин — откройте сайт в браузере по ссылке выше. В панели XAMPP «Admin» у Apache — это настройки веб-сервера, а не админка SShop.
+
 ### Сервер (PHP, заглушка)
 
 Любым способом, который поднимает `server/public` как web-root (например, встроенный сервер PHP):

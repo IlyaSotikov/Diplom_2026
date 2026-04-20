@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /Diplom_2026/server/public/app/
+
+# If requested file or directory exists, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Otherwise route all requests to React index.html
+RewriteRule ^ index.html [L]
+
