@@ -16,12 +16,13 @@ export function CartPage() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [checkoutSuccess, setCheckoutSuccess] = useState<string | null>(null)
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false)
+  const phonePattern = /^[0-9+()\-\s]{6,40}$/
 
   const canCheckout = useMemo(() => {
     return (
       items.length > 0 &&
       form.fullName.trim().length >= 2 &&
-      form.phone.trim().length >= 6 &&
+      phonePattern.test(form.phone.trim()) &&
       form.address.trim().length >= 6
     )
   }, [form.address, form.fullName, form.phone, items.length])
@@ -31,7 +32,7 @@ export function CartPage() {
     setCheckoutSuccess(null)
 
     if (!canCheckout) {
-      setCheckoutError('Проверьте данные получателя: имя, телефон и адрес обязательны.')
+      setCheckoutError('Проверьте данные: ФИО (минимум 2 символа), корректный телефон и адрес (минимум 6 символов).')
       return
     }
 

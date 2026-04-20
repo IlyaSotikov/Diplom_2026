@@ -1,10 +1,13 @@
 import type { Product, ProductCategory, ProductId } from '../model/types'
-
-/** Стабильные превью через Lorem Picsum (нужен интернет для загрузки картинки) */
-function productImage(id: string) {
-  const seed = id.replace(/[^a-zA-Z0-9]/g, '')
-  return `https://picsum.photos/seed/sshop-${seed}/480/320`
-}
+import imgP001 from '../../../assets/products/p-001-whey.png'
+import imgP002 from '../../../assets/products/p-002-casein.png'
+import imgP003 from '../../../assets/products/p-003-mass.png'
+import imgP004 from '../../../assets/products/p-004-fast.png'
+import imgP005 from '../../../assets/products/p-005-bcaa.png'
+import imgP006 from '../../../assets/products/p-006-bcaa-zero.png'
+import imgP007 from '../../../assets/products/p-007-vitamin.png'
+import imgP008 from '../../../assets/products/p-008-omega.png'
+import imgP009 from '../../../assets/products/p-009-creatine.png'
 
 const mockProducts: Product[] = [
   {
@@ -15,7 +18,7 @@ const mockProducts: Product[] = [
     priceRub: 4390,
     inStock: true,
     shortDescription: 'Быстроусвояемый белок после тренировки, вкус шоколад.',
-    imageUrl: productImage('p-001'),
+    imageUrl: imgP001,
   },
   {
     id: 'p-002',
@@ -25,7 +28,7 @@ const mockProducts: Product[] = [
     priceRub: 3590,
     inStock: true,
     shortDescription: 'Медленный белок для приема перед сном.',
-    imageUrl: productImage('p-002'),
+    imageUrl: imgP002,
   },
   {
     id: 'p-003',
@@ -35,7 +38,7 @@ const mockProducts: Product[] = [
     priceRub: 5690,
     inStock: true,
     shortDescription: 'Высококалорийная смесь для набора массы.',
-    imageUrl: productImage('p-003'),
+    imageUrl: imgP003,
   },
   {
     id: 'p-004',
@@ -45,7 +48,7 @@ const mockProducts: Product[] = [
     priceRub: 2890,
     inStock: true,
     shortDescription: 'Оптимальный вариант после силовой тренировки.',
-    imageUrl: productImage('p-004'),
+    imageUrl: imgP004,
   },
   {
     id: 'p-005',
@@ -55,7 +58,7 @@ const mockProducts: Product[] = [
     priceRub: 2690,
     inStock: true,
     shortDescription: 'Аминокислоты для восстановления мышц.',
-    imageUrl: productImage('p-005'),
+    imageUrl: imgP005,
   },
   {
     id: 'p-006',
@@ -65,7 +68,7 @@ const mockProducts: Product[] = [
     priceRub: 2490,
     inStock: false,
     shortDescription: 'Без сахара, подходит для сушки.',
-    imageUrl: productImage('p-006'),
+    imageUrl: imgP006,
   },
   {
     id: 'p-007',
@@ -75,7 +78,7 @@ const mockProducts: Product[] = [
     priceRub: 1990,
     inStock: true,
     shortDescription: 'Базовый комплекс витаминов и минералов на каждый день.',
-    imageUrl: productImage('p-007'),
+    imageUrl: imgP007,
   },
   {
     id: 'p-008',
@@ -85,7 +88,7 @@ const mockProducts: Product[] = [
     priceRub: 2390,
     inStock: true,
     shortDescription: 'Поддержка сердечно-сосудистой системы и суставов.',
-    imageUrl: productImage('p-008'),
+    imageUrl: imgP008,
   },
   {
     id: 'p-009',
@@ -95,7 +98,7 @@ const mockProducts: Product[] = [
     priceRub: 2190,
     inStock: true,
     shortDescription: 'Повышение силовых показателей и работоспособности.',
-    imageUrl: productImage('p-009'),
+    imageUrl: imgP009,
   },
 ]
 

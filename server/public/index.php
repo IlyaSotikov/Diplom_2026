@@ -91,7 +91,7 @@ function currentUser(): ?array
   }
 
   $stmt = db()->prepare(
-    'SELECT id, full_name, email, is_admin, created_at FROM users WHERE id = :id LIMIT 1'
+    'SELECT id, full_name, email, phone, default_address, is_admin, created_at FROM users WHERE id = :id LIMIT 1'
   );
   $stmt->execute(['id' => $userId]);
   $user = $stmt->fetch();
@@ -105,6 +105,36 @@ function ensureAuth(): array
     jsonResponse(401, ['ok' => false, 'message' => 'Требуется авторизация.']);
   }
   return $user;
+}
+
+function ensureAdmin(): array
+{
+  $user = ensureAuth();
+  if (($user['is_admin'] ?? false) !== true) {
+    jsonResponse(403, ['ok' => false, 'message' => 'Недостаточно прав доступа.']);
+  }
+  return $user;
+}
+
+function orderFromRow(array $row): array
+{
+  $items = json_decode((string)($row['items_json'] ?? '[]'), true);
+  if (!is_array($items)) {
+    $items = [];
+  }
+
+  return [
+    'id' => 'ORD-' . str_pad((string)$row['id'], 6, '0', STR_PAD_LEFT),
+    'createdAtIso' => date(DATE_ATOM, strtotime((string)$row['created_at'])),
+    'status' => (string)$row['status'],
+    'items' => $items,
+    'totalRub' => (int)$row['total_rub'],
+    'contact' => [
+      'fullName' => (string)$row['contact_full_name'],
+      'phone' => (string)$row['contact_phone'],
+      'address' => (string)$row['contact_address'],
+    ],
+  ];
 }
 
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
@@ -150,13 +180,15 @@ if (str_ends_with($requestPath, '/api/auth/register') && $method === 'POST') {
   }
 
   $insert = $pdo->prepare(
-    'INSERT INTO users (full_name, email, password_hash, is_admin, created_at)
-     VALUES (:full_name, :email, :password_hash, 0, NOW())'
+    'INSERT INTO users (full_name, email, password_hash, phone, default_address, is_admin, created_at)
+     VALUES (:full_name, :email, :password_hash, :phone, :default_address, 0, NOW())'
   );
   $insert->execute([
     'full_name' => $fullName,
     'email' => $email,
     'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+    'phone' => '',
+    'default_address' => '',
   ]);
 
   $_SESSION['user_id'] = (int)$pdo->lastInsertId();
@@ -203,25 +235,239 @@ if (str_ends_with($requestPath, '/api/auth/logout') && $method === 'POST') {
 
 if (str_ends_with($requestPath, '/api/profile') && $method === 'GET') {
   $user = ensureAuth();
-  jsonResponse(200, ['ok' => true, 'profile' => $user]);
+  jsonResponse(200, [
+    'ok' => true,
+    'profile' => [
+      'fullName' => (string)$user['full_name'],
+      'email' => (string)$user['email'],
+      'phone' => (string)($user['phone'] ?? ''),
+      'defaultAddress' => (string)($user['default_address'] ?? ''),
+    ],
+  ]);
+}
+
+if (str_ends_with($requestPath, '/api/profile') && $method === 'POST') {
+  $user = ensureAuth();
+  $body = readJsonBody();
+  $fullName = trim((string)($body['fullName'] ?? ''));
+  $phone = trim((string)($body['phone'] ?? ''));
+  $defaultAddress = trim((string)($body['defaultAddress'] ?? ''));
+
+  $fullNameLen = function_exists('mb_strlen') ? mb_strlen($fullName) : strlen($fullName);
+  $addressLen = function_exists('mb_strlen') ? mb_strlen($defaultAddress) : strlen($defaultAddress);
+
+  if ($fullNameLen < 2) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Имя должно содержать минимум 2 символа.']);
+  }
+  if (!preg_match('/^[0-9+()\\-\\s]{6,40}$/', $phone)) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Введите корректный номер телефона.']);
+  }
+  if ($addressLen < 6) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Адрес должен содержать минимум 6 символов.']);
+  }
+
+  $update = db()->prepare(
+    'UPDATE users SET full_name = :full_name, phone = :phone, default_address = :default_address WHERE id = :id'
+  );
+  $update->execute([
+    'full_name' => $fullName,
+    'phone' => $phone,
+    'default_address' => $defaultAddress,
+    'id' => $user['id'],
+  ]);
+
+  $refresh = currentUser();
+  if (!is_array($refresh)) {
+    jsonResponse(500, ['ok' => false, 'message' => 'Не удалось получить обновлённый профиль.']);
+  }
+
+  jsonResponse(200, [
+    'ok' => true,
+    'profile' => [
+      'fullName' => (string)$refresh['full_name'],
+      'email' => (string)$refresh['email'],
+      'phone' => (string)($refresh['phone'] ?? ''),
+      'defaultAddress' => (string)($refresh['default_address'] ?? ''),
+    ],
+  ]);
+}
+
+if (str_ends_with($requestPath, '/api/orders') && $method === 'GET') {
+  $user = ensureAuth();
+  $all = isset($_GET['all']) && $_GET['all'] === '1';
+
+  if ($all) {
+    if (($user['is_admin'] ?? false) !== true) {
+      jsonResponse(403, ['ok' => false, 'message' => 'Только администратор может просматривать все заказы.']);
+    }
+    $stmt = db()->query('SELECT * FROM orders ORDER BY created_at DESC');
+  } else {
+    $stmt = db()->prepare('SELECT * FROM orders WHERE user_id = :user_id ORDER BY created_at DESC');
+    $stmt->execute(['user_id' => $user['id']]);
+  }
+
+  $rows = $all ? $stmt->fetchAll() : $stmt->fetchAll();
+  $orders = array_map('orderFromRow', $rows);
+  jsonResponse(200, ['ok' => true, 'orders' => $orders]);
+}
+
+if (str_ends_with($requestPath, '/api/orders') && $method === 'POST') {
+  $user = ensureAuth();
+  $body = readJsonBody();
+  $items = $body['items'] ?? [];
+  $contact = $body['contact'] ?? [];
+
+  if (!is_array($items) || count($items) === 0) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Корзина пуста. Добавьте товары перед оформлением.']);
+  }
+
+  $fullName = trim((string)($contact['fullName'] ?? ''));
+  $phone = trim((string)($contact['phone'] ?? ''));
+  $address = trim((string)($contact['address'] ?? ''));
+  $fullNameLen = function_exists('mb_strlen') ? mb_strlen($fullName) : strlen($fullName);
+  $addressLen = function_exists('mb_strlen') ? mb_strlen($address) : strlen($address);
+
+  if ($fullNameLen < 2) {
+    jsonResponse(422, ['ok' => false, 'message' => 'ФИО должно содержать минимум 2 символа.']);
+  }
+  if (!preg_match('/^[0-9+()\\-\\s]{6,40}$/', $phone)) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Введите корректный номер телефона.']);
+  }
+  if ($addressLen < 6) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Адрес должен содержать минимум 6 символов.']);
+  }
+
+  $normalizedItems = [];
+  $totalRub = 0;
+  foreach ($items as $item) {
+    if (!is_array($item)) {
+      continue;
+    }
+    $productId = trim((string)($item['productId'] ?? ''));
+    $title = trim((string)($item['title'] ?? ''));
+    $priceRub = (int)($item['priceRub'] ?? 0);
+    $quantity = (int)($item['quantity'] ?? 0);
+    if ($productId === '' || $title === '' || $priceRub <= 0 || $quantity <= 0) {
+      continue;
+    }
+    $line = [
+      'productId' => $productId,
+      'title' => $title,
+      'priceRub' => $priceRub,
+      'quantity' => $quantity,
+    ];
+    $normalizedItems[] = $line;
+    $totalRub += $priceRub * $quantity;
+  }
+
+  if (count($normalizedItems) === 0 || $totalRub <= 0) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Некорректный состав заказа.']);
+  }
+
+  // Базовая защита от дублей: одинаковый заказ в пределах 30 секунд.
+  $fingerprintPayload = [
+    'user_id' => $user['id'],
+    'items' => $normalizedItems,
+    'contact' => [
+      'fullName' => $fullName,
+      'phone' => $phone,
+      'address' => $address,
+    ],
+  ];
+  $fingerprint = hash('sha256', json_encode($fingerprintPayload, JSON_UNESCAPED_UNICODE));
+  $lastFingerprint = (string)($_SESSION['last_order_fingerprint'] ?? '');
+  $lastAt = (int)($_SESSION['last_order_at'] ?? 0);
+  $now = time();
+  if ($lastFingerprint !== '' && $lastFingerprint === $fingerprint && ($now - $lastAt) <= 30) {
+    jsonResponse(409, ['ok' => false, 'message' => 'Похожий заказ уже оформлен. Подождите немного перед повторной отправкой.']);
+  }
+
+  $insert = db()->prepare(
+    'INSERT INTO orders (user_id, status, total_rub, contact_full_name, contact_phone, contact_address, items_json, created_at)
+     VALUES (:user_id, :status, :total_rub, :contact_full_name, :contact_phone, :contact_address, :items_json, NOW())'
+  );
+  $insert->execute([
+    'user_id' => $user['id'],
+    'status' => 'new',
+    'total_rub' => $totalRub,
+    'contact_full_name' => $fullName,
+    'contact_phone' => $phone,
+    'contact_address' => $address,
+    'items_json' => json_encode($normalizedItems, JSON_UNESCAPED_UNICODE),
+  ]);
+
+  $id = (int)db()->lastInsertId();
+  $select = db()->prepare('SELECT * FROM orders WHERE id = :id LIMIT 1');
+  $select->execute(['id' => $id]);
+  $row = $select->fetch();
+  if (!is_array($row)) {
+    jsonResponse(500, ['ok' => false, 'message' => 'Не удалось получить созданный заказ.']);
+  }
+  $_SESSION['last_order_fingerprint'] = $fingerprint;
+  $_SESSION['last_order_at'] = $now;
+  jsonResponse(201, ['ok' => true, 'order' => orderFromRow($row)]);
+}
+
+if (str_ends_with($requestPath, '/api/orders/status') && $method === 'POST') {
+  ensureAdmin();
+  $body = readJsonBody();
+  $orderId = trim((string)($body['orderId'] ?? ''));
+  $status = trim((string)($body['status'] ?? ''));
+
+  if (!preg_match('/^ORD-\\d{6}$/', $orderId)) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Некорректный идентификатор заказа.']);
+  }
+  if (!in_array($status, ['new', 'processing', 'shipped', 'cancelled'], true)) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Некорректный статус заказа.']);
+  }
+
+  $dbId = (int)ltrim(substr($orderId, 4), '0');
+  if ($dbId <= 0) {
+    jsonResponse(422, ['ok' => false, 'message' => 'Некорректный идентификатор заказа.']);
+  }
+
+  $update = db()->prepare('UPDATE orders SET status = :status WHERE id = :id');
+  $update->execute(['status' => $status, 'id' => $dbId]);
+  if ($update->rowCount() === 0) {
+    jsonResponse(404, ['ok' => false, 'message' => 'Заказ не найден.']);
+  }
+
+  $select = db()->prepare('SELECT * FROM orders WHERE id = :id LIMIT 1');
+  $select->execute(['id' => $dbId]);
+  $row = $select->fetch();
+  if (!is_array($row)) {
+    jsonResponse(404, ['ok' => false, 'message' => 'Заказ не найден.']);
+  }
+  jsonResponse(200, ['ok' => true, 'order' => orderFromRow($row)]);
 }
 
 if (str_ends_with($requestPath, '/api/reviews') && $method === 'GET') {
   $productId = isset($_GET['productId']) ? trim((string)$_GET['productId']) : '';
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $pageSize = max(1, min(20, (int)($_GET['pageSize'] ?? 5)));
+  $offset = ($page - 1) * $pageSize;
   if ($productId === '' || strlen($productId) > 32) {
     jsonResponse(422, ['ok' => false, 'message' => 'Укажите корректный productId.']);
   }
+
+  $countStmt = db()->prepare('SELECT COUNT(*) AS total FROM product_reviews WHERE product_id = :pid');
+  $countStmt->execute(['pid' => $productId]);
+  $total = (int)($countStmt->fetch()['total'] ?? 0);
 
   $stmt = db()->prepare(
     'SELECT r.id, r.product_id, r.rating, r.review_text AS text, r.created_at, u.full_name AS author_name
      FROM product_reviews r
      INNER JOIN users u ON u.id = r.user_id
      WHERE r.product_id = :pid
-     ORDER BY r.created_at DESC'
+     ORDER BY r.created_at DESC
+     LIMIT :limit OFFSET :offset'
   );
-  $stmt->execute(['pid' => $productId]);
+  $stmt->bindValue(':pid', $productId, PDO::PARAM_STR);
+  $stmt->bindValue(':limit', $pageSize, PDO::PARAM_INT);
+  $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+  $stmt->execute();
   $rows = $stmt->fetchAll();
-  jsonResponse(200, ['ok' => true, 'reviews' => $rows]);
+  jsonResponse(200, ['ok' => true, 'reviews' => $rows, 'total' => $total, 'page' => $page, 'pageSize' => $pageSize]);
 }
 
 if (str_ends_with($requestPath, '/api/reviews') && $method === 'POST') {

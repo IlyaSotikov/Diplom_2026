@@ -62,3 +62,9 @@
   font-size: 13px;
 }
 
+.fieldError {
+  color: #ffb1b1;
+  font-size: 12px;
+  margin-top: 5px;
+}
+

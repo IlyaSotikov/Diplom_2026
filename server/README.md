@@ -6,7 +6,7 @@
 
 1. Откройте phpMyAdmin.
 2. Импортируйте файл `server/database/schema.sql`.
-3. Убедитесь, что создана база `sshop_db` и таблицы **`users`** и **`product_reviews`**.
+3. Убедитесь, что создана база `sshop_db` и таблицы **`users`**, **`product_reviews`**, **`orders`**.
 4. Для выдачи админ-доступа выполните SQL:
    `UPDATE users SET is_admin = 1 WHERE email = 'your_admin_email@example.com';`
 
@@ -27,6 +27,11 @@
 - `GET /server/public/index.php/api/auth/me`
 - `POST /server/public/index.php/api/auth/logout`
 - `GET /server/public/index.php/api/profile`
+- `POST /server/public/index.php/api/profile`
+- `GET /server/public/index.php/api/orders`
+- `GET /server/public/index.php/api/orders?all=1` (только админ)
+- `POST /server/public/index.php/api/orders`
+- `POST /server/public/index.php/api/orders/status` (только админ)
 - `GET /server/public/index.php/api/reviews?productId=p-001`
 - `POST /server/public/index.php/api/reviews` (тело JSON: `productId`, `text`, `rating` — только для авторизованного пользователя)
 

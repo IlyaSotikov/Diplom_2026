@@ -117,3 +117,31 @@
   cursor: pointer;
 }
 
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pagerBtn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e7ecff;
+  border-radius: 9px;
+  padding: 6px 9px;
+  cursor: pointer;
+}
+
+.pagerBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagerText {
+  color: rgba(231, 236, 255, 0.72);
+  font-size: 13px;
+}
+

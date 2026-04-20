@@ -19,6 +19,9 @@ export function ProductPage() {
   const [reviews, setReviews] = useState<ProductReview[]>([])
   const [reviewsStatus, setReviewsStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [reviewsError, setReviewsError] = useState<string | null>(null)
+  const [reviewsPage, setReviewsPage] = useState(1)
+  const [reviewsTotal, setReviewsTotal] = useState(0)
+  const reviewsPageSize = 5
   const [reviewText, setReviewText] = useState('')
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
@@ -28,13 +31,18 @@ export function ProductPage() {
     setReviewsStatus('loading')
     setReviewsError(null)
     try {
-      const res = await reviewsApi.list(productId)
+      const res = await reviewsApi.list(productId, reviewsPage, reviewsPageSize)
       setReviews(res.reviews)
+      setReviewsTotal(res.total)
       setReviewsStatus('idle')
     } catch (e: unknown) {
       setReviewsStatus('error')
       setReviewsError(e instanceof Error ? e.message : 'Не удалось загрузить отзывы.')
     }
+  }, [productId, reviewsPage])
+
+  useEffect(() => {
+    setReviewsPage(1)
   }, [productId])
 
   useEffect(() => {
@@ -50,7 +58,10 @@ export function ProductPage() {
         text: reviewText.trim(),
         rating: reviewRating,
       })
-      setReviews((prev) => [res.review, ...prev])
+      if (reviewsPage === 1) {
+        setReviews((prev) => [res.review, ...prev].slice(0, reviewsPageSize))
+      }
+      setReviewsTotal((prev) => prev + 1)
       setReviewText('')
       setReviewRating(5)
     } catch (e: unknown) {
@@ -189,6 +200,31 @@ export function ProductPage() {
           </ul>
           {!reviews.length && reviewsStatus !== 'loading' ? (
             <div className={styles.reviewHint}>Пока нет отзывов — будьте первым.</div>
+          ) : null}
+          {reviewsTotal > reviewsPageSize ? (
+            <div className={styles.reviewPager}>
+              <button
+                type="button"
+                className={styles.reviewPagerBtn}
+                disabled={reviewsPage <= 1}
+                onClick={() => setReviewsPage((prev) => Math.max(1, prev - 1))}
+              >
+                ← Назад
+              </button>
+              <span className={styles.reviewPagerText}>
+                Страница {reviewsPage} из {Math.max(1, Math.ceil(reviewsTotal / reviewsPageSize))}
+              </span>
+              <button
+                type="button"
+                className={styles.reviewPagerBtn}
+                disabled={reviewsPage >= Math.ceil(reviewsTotal / reviewsPageSize)}
+                onClick={() =>
+                  setReviewsPage((prev) => Math.min(Math.ceil(reviewsTotal / reviewsPageSize), prev + 1))
+                }
+              >
+                Вперёд →
+              </button>
+            </div>
           ) : null}
         </Card>
       ) : null}

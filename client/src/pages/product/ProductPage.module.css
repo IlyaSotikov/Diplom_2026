@@ -249,3 +249,31 @@
   color: rgba(231, 236, 255, 0.88);
 }
 
+.reviewPager {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reviewPagerBtn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e7ecff;
+  border-radius: 10px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.reviewPagerBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reviewPagerText {
+  color: rgba(231, 236, 255, 0.72);
+  font-size: 13px;
+}
+

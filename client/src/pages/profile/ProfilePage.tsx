@@ -6,6 +6,8 @@ import styles from './ProfilePage.module.css'
 
 export function ProfilePage() {
   const { status, profile, orders, message, isSaving, saveProfile, reload } = useProfileData()
+  const [ordersPage, setOrdersPage] = useState(1)
+  const ordersPageSize = 5
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -18,6 +20,10 @@ export function ProfilePage() {
     if (!profile) return
     setForm(profile)
   }, [profile])
+
+  useEffect(() => {
+    setOrdersPage(1)
+  }, [orders.length])
 
   async function handleSave() {
     setSaveSuccess(null)
@@ -85,7 +91,9 @@ export function ProfilePage() {
             <div className={styles.muted}>Пока нет заказов.</div>
           ) : (
             <div className={styles.orders}>
-              {orders.map((order) => (
+              {orders
+                .slice((ordersPage - 1) * ordersPageSize, ordersPage * ordersPageSize)
+                .map((order) => (
                 <div key={order.id} className={styles.orderItem}>
                   <div className={styles.orderTop}>
                     <span>{order.id}</span>
@@ -95,6 +103,31 @@ export function ProfilePage() {
                   <div className={styles.muted}>Сумма: {order.totalRub.toLocaleString('ru-RU')} ₽</div>
                 </div>
               ))}
+              {orders.length > ordersPageSize ? (
+                <div className={styles.pager}>
+                  <button
+                    type="button"
+                    className={styles.pagerBtn}
+                    disabled={ordersPage <= 1}
+                    onClick={() => setOrdersPage((prev) => Math.max(1, prev - 1))}
+                  >
+                    ← Назад
+                  </button>
+                  <span className={styles.pagerText}>
+                    Страница {ordersPage} из {Math.ceil(orders.length / ordersPageSize)}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.pagerBtn}
+                    disabled={ordersPage >= Math.ceil(orders.length / ordersPageSize)}
+                    onClick={() =>
+                      setOrdersPage((prev) => Math.min(Math.ceil(orders.length / ordersPageSize), prev + 1))
+                    }
+                  >
+                    Вперёд →
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
         </Card>

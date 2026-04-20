@@ -23,7 +23,7 @@ export function useAdminOrders() {
   const reload = useCallback(async () => {
     setState((prev) => ({ ...prev, status: 'loading', message: null }))
     try {
-      const [orders, products] = await Promise.all([ordersApi.list(), productsApi.list()])
+      const [orders, products] = await Promise.all([ordersApi.listAll(), productsApi.list()])
       setState({
         status: 'success',
         orders,
